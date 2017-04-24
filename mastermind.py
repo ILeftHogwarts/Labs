@@ -1,41 +1,47 @@
 import random
 
-def player_check(hidden_colors,guess,all_colors):
+def player_check(hiden_colors,guess):
     correct_answer_count = 0
     clue = []
-    checked_hidden_colors = hidden_colors.copy()
-    checked_guess = guess.copy()
+    checked_hiden_colors = hiden_colors
+    checked_guess = guess
     color_inx = 0
-    while(True):
-        try:            
-            if(checked_hidden_colors[color_inx] == checked_guess[color_inx]):
-                clue.append(2);
-                correct_answer_count = correct_answer_count + 1
-                checked_hidden_colors.pop(color_inx)
-                checked_guess.pop(color_inx)
+    for color in guess.values():
+        clue_variant = 0
+        start_inx = -1
+        while (True):
+            try:    
+                inx = hiden_colors.index(color,start_inx+1)
+            except:
+                break
             else:
-                color_inx = color_inx + 1 
-        except IndexError:
-            break
+                if(inx == color_inx):
+                    clue_variant = 2
+                    correct_answer_count = correct_answer_count + 1
+                    break
+                else:
+                    clue_variant = 1
+                start_inx = inx
+        color_inx = color_inx + 1
+        if(clue_variant != 0):
+            clue.append(clue_variant)
+    clue.sort()
     if (correct_answer_count == 4):
         print("The guess is correct. You win!")
-        return True
-    else:
-        for color in all_colors.values():
-            clue.extend([1]*min(checked_guess.count(color),checked_hidden_colors.count(color)))
-        clue.sort()
-        print("Clue : " , clue)
         return False
+    else:
+        print("Clue : " , clue)
+        return True
 
 def player_codebreaker(all_colors):
     counter = 0
-    hidden_colors = []
-    flag = False
+    hiden_colors = {}
+    flag = True
     for i in range(4):
         c = random.randint(0,len(all_colors)-1)
-        hidden_colors.append(all_colors[c])
-    while(counter < 10):
-        guess = []
+        hiden_colors[i] = all_colors[c]
+    while(flag and counter < 10):
+        guess = {}
         print ("Make a guess of four colors:")
         print ("----------------")
         for key, value in all_colors.items():
@@ -45,21 +51,18 @@ def player_codebreaker(all_colors):
         while(itr < 4):
             try:
                 guess_color = int(input("Guess color : "))
-                guess.append(all_colors[guess_color])
+                guess[itr] = all_colors[guess_color]
                 itr = itr + 1
             except ValueError:
                 print("Use numbers to choose color.")
             except KeyError:
                 print("Your number isn't in list.")
         print ("Your guess:\n",guess)
-        flag = player_check(hidden_colors,guess,all_colors)
-        if(flag):
-            return
+        flag = player_check(hiden_colors,guess)
         counter = counter + 1
     else:
         print("You lose!")
-        print("Correct answers are:\n",hidden_colors)
-        return
+        print("Correct answers are:\n",hiden_colors)    
     
 
 def computer_codebreaker(all_colors):
